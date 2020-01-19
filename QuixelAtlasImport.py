@@ -183,6 +183,9 @@ while True: #envelope loop
 		#7 replace "heightVar" with height
 				
 		# add tags with json 
+		
+		#copy and rename template.json into rootDir
+		#print("Import complete. The atlas should now show up under the "mixer" category")
 			
 	
 	
