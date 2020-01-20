@@ -1,10 +1,11 @@
 {
   "pack": {
-    "_id": "custom",
-    "name": "custom"
+    "_id": "custom_atlas",
+    "name": "custom atlas""
   },
-  "name": "tmpName",
-  "tags":[],
+  "name": "tmp_Name",
+  "tags": [
+  ],
   "previews": {
     "images": [
       {
