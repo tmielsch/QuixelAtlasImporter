@@ -236,11 +236,6 @@ while True: #envelope loop
 		
 		
 		
-		with open(os.path.join(rootDir, ID+".json"), "w") as J: # opens json file as json
-			data = json.load(J) #serializes file content into "data" The whole JSON is a dict containing other dicts, mere keys:value pairs and lists/arrays
-			tags.append(tagsIn) # appends the content of tagsIn[] (the user input tags) to the "tags" array of the json serialization
-			final = json.dumps(data)
-			J.write(final)
 		
 		#Done?
 		break	
