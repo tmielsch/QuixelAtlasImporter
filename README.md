@@ -32,15 +32,20 @@ Library Path: "Example"?
 JSON config file: Stores all uIn0 information permanently.
 
 {
-	"libDir":"tlibDir",
-	"mCat":"tmCat",
-	"sCat":"tsCat",
-	"res":"tres",
-	"scnA":"tscnA",
-	"scnH":"th",
-	"tagsIn":"ttagsIn"
+	"libDir":"",
+	"mCat":"",
+	"sCat":"",
+	"res":"",
+	"scnA":"",
+	"scnH":"",
+	"tagsIn":""
 }
 		
-		
+save logic:
+
+the program opens right at the beginning a file "data.json"
+
+
+Problem: The json gets overwritten in the beginning so that jsom.load has nothing to load.
 
 
