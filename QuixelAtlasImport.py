@@ -30,7 +30,7 @@ libDir = "" #needed throughout the program, set by uInLib()
 rootDir = ""#needed throughout the program, generated and set by mkDir()
 mapNames = [] # created in cpMaps(), needed in thumbs()
 data={} # all uIn_R() need to read from data. It's filled by loadData()
-
+restart = 0
 ##uIn2:
 srcDir = ""
 name = ""
@@ -42,9 +42,6 @@ uIn1dict = {'mCat':"",'sCat':"",'res':"",'scnA':"",'scnH':"",'tags':[]} # contai
 	
 
 
-# Function Declarations
-#TODO Add save logic to uIn1() & uInLib()
-#uInput
 
 
 def loadData(): #handles loading data.json into a dict 'data'
@@ -160,7 +157,7 @@ def In1R():#reads uIn1dict from file, calls uIn1() if nothing found, and asks if
 def uIn2(): ## This function handles uInput that has to be made each time. // Has to be called in every iteration
 	print("Be careful, there is no check for invalid paths.\n")
 	
-	print("Make sure your maps have at least the three first letters in their Abbrevation. e.g. mapname_alb.jpg (except AO).\n")
+	print("Make sure your maps have at least the three first letters in their abbrevation. e.g. mapname_alb.jpg (except AO).\n")
 	global srcDir
 	global name
 	global ID
@@ -168,18 +165,13 @@ def uIn2(): ## This function handles uInput that has to be made each time. // Ha
 	
 	srcDir = input("Enter the path of your source folder containing all texture maps to be imported. You can provide your custom preview named as such to avoid a generated one.:\n")+"\\"
 	name = input("Enter the name visible in Bridge:\n")
-	#print("\n")
+	
 	ID = input("Enter an ID. (Tip: use the ID of the source atlas with xy coordinates describing the position of the Decal in the Atlas in terms of rows and columns. rcihc2 ->xyrcihc2 e.g. 24rcihc2):\n")
 	print("\n")
 	IDminus2 = ID[:-1] ## removes the "2" from the name for naming the maps in the rootDir
 					
 def uInConfirm(): ##prints all uIn values and stops the program so user can restart or continue
-	#global srcDir
-	#global name
-	#global ID
-	#global uIn1dict
-	#global libDir
-	
+	global restart
 	print("Here you can check if you made any mistakes, and if necessary, restart the assistant.\n")
 	
 	print("Libary Path: " + libDir+"\n")
@@ -205,13 +197,16 @@ def uInConfirm(): ##prints all uIn values and stops the program so user can rest
 	for tg in uIn1dict['tags']:
 		print(tg)
 	print("\n")
-	print("Press Enter to continue or re-run the script if you find an error.")
-	input()#holds the program until enter is pressed.
+	print("Press Enter to continue or enter something to re-run the script if you find an error.")
+	conf = input()#holds the program until enter is pressed.
+	if conf != "":
+		restart = 1
+	else:
+		restart = 0
 	print("\n")
 def mkDirs(): ## handles directory creation
 	#Create Directories
 	global rootDir
-	#global uIn1dict
 	rootDir = libDir + "Downloaded\\atlas\\" + uIn1dict['mCat']+"_"+uIn1dict['sCat']+"_"+ID+"\\" ## Generate path name for root directory
 	try:
 		os.mkdir(rootDir) ##create atlas root folder
@@ -225,14 +220,14 @@ def mkDirs(): ## handles directory creation
 
 def cpMaps(): ##handles copying and converting maps from source to root
 	global mapNames
-	#global srcDir
 	global prevcheck
 	global preview
-	#global uIn1dict
+
 	mapAbr = ["alb","AO","dis","glo","nor","opa","rou","spe","tra"] # patterns for regex
 	mapNames = ["Albedo","AO","Displacement","Gloss","Normal","Opacity","Roughness","Specular","Translucency"] # actual names in same order. mapAbr[0]="alb", mapNames[0]= "Albedo"
 	srcNames = os.listdir(srcDir) # generates array with filenames within the given directory. Isn't necessarily as long as the map-Arrays.
 	filenames=[]
+	
 	for srcName in srcNames:
 		for i, item in enumerate(mapAbr):
 			if re.search(item, srcName, flags= re.I):
@@ -255,11 +250,7 @@ def cpMaps(): ##handles copying and converting maps from source to root
 		print(fn)	
 
 def mkPrev(): # handles preview generation or conversion
-	#global uIn1dict
-	#global prevcheck
-	#global IDminus2
-	#global rootDir
-	#global ID
+
 	# check if preview was given
 	if prevcheck == 1:
 		prev1280 = preview.resize((1280,1280),PIL.Image.ANTIALIAS)
@@ -287,10 +278,7 @@ def mkPrev(): # handles preview generation or conversion
 		print("\n")
 def mkThumbs(): ##handles map>thumb conversion
 	maps={}
-	#global rootDir
-	#global IDminus2
-	#global uIn1dict
-	#global mapNames
+
 	for i,item in enumerate(mapAbr):
 		maps[item]= Image.open(rootDir+IDminus2+"_"+uIn1dict['res']+"_"+mapNames[i]+".jpg")
 		maps[item]= maps[item].resize((2048,2048),PIL.Image.ANTIALIAS)
@@ -348,43 +336,44 @@ def jEdit(): ##handles JSON editing
 while True:
 #################################LOOP BEGIN#######################################
 
-	#1. With each iteration, data.json gets opened as d to be further used in the program
 	
-	
-	#2. with data.json loaded, it gets deserialized into the data dict. All operations are handled on this dict. After all operations have ended, the dict gets re-serialized into data.json
+	#1. with data.json loaded, it gets deserialized into the data dict. All operations are handled on this dict. After all operations have ended, the dict gets re-serialized into data.json
 	loadData()
 	
 	
-	#3. reads libDir from data dict or  call uInLib() to prompt and store libDir into data dict
+	#2. reads libDir from data dict or  call uInLib() to prompt and store libDir into data dict
 	InLibR() #libDir=data{'libDir':val}
 	
-	#4. reads all keys of uIn1dict{} from data{} or call uIn1() to promt and store u1n1{} in data{}
+	#3. reads all keys of uIn1dict{} from data{} or call uIn1() to promt and store u1n1{} in data{}
 	In1R()
 	
-	#5. promt user for single-use data
+	#4. promt user for single-use data
 	uIn2()
 	
-	#6. let user confirm data
+	#5. let user confirm data
 	uInConfirm()
-	
+	if restart == 0:
+		pass
+	elif restart == 1:
+		continue
 	##############################################################
 	
-	#7. create neccessary directories
+	#6. create neccessary directories
 	mkDirs()
 	
-	#8. copy and convert maps from source to target
+	#7. copy and convert maps from source to target
 	cpMaps()
 	
-	#9. generate or convert previews
+	#8. generate or convert previews
 	mkPrev()
 	
-	#10. generate thumbs from maps
+	#9. generate thumbs from maps
 	mkThumbs()
 	
-	#11. copy json template and modify it in place
+	#10. copy json template and modify it in place
 	jEdit()
 	
-	#12. save data{} to data.json
+	#11. save data{} to data.json
 	saveData()	
 #################################LOOP END#########################################
 	
