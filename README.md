@@ -18,7 +18,7 @@ GNU General Public License for more details.
 - Extract zip content where you want
 - open cmd (if any of your Quixel Library or Source directories has restricted access, start cmd as admin)
 - cd to home directory of script
-- enter QuixelImport.py to run script.
+- enter QuixelAtlasImport.py to run script.
 
 # How to use
 - Prepare a source folder with all maps you want to import. Every map (except AO) needs to have atleast three of the first letters of their type in their file name. (xyzalb would be detected as Albedo)
