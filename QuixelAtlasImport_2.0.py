@@ -20,27 +20,35 @@ import os, re, PIL, json, fileinput, sys
 from PIL import Image
 from shutil import copyfile
 
-#global Variables
-prevcheck = 0
+####global Variables####
 
-libDir = ""
-rootDir = ""
+prevcheck = 0
+preview = "" # contains preview picture opened in cpMaps() to be used by prev()
+
+libDir = "" #needed throughout the program, set by uInLib()
+
+#Misc Vars
+rootDir = ""#needed throughout the program, generated and set by mkDir()
+mapNames = [] # created in cpMaps(), needed in thumbs()
+data={} # all uIn_R() need to read from data. It's filled by loadData()
+
+##uIn0:
+srcDir = ""
+name = ""
+ID = ""
+IDminus2 = ""
 
 ##uIn1:
-uIn1={srcDir
-srcDir = ""
-mCat = ""
-sCat = ""
-res = ""
-scnA = ""
-scnH = ""
-tagsIn = []
-data = {} ##contains json serialization
+uIn1 = {'mCat':"",'sCat':"",'res':"",'scnA':"",'scnH':"",'tags':[]} # contains all Variables that can be saved and retrieved to and from JSON
+	
 
 
 # Function Declarations
 #TODO Add save logic to uIn1() & uInLib()
 #uInput
+def loadData(): #handles loading data.json
+	d = open('data.json',"w+")
+	data = json.load(d) # serializes data.json as dict (initialized as global var)
 def uInLib():#handles just the library input
 	libDir = input("Enter the path of your Quixel Library Directory (e.g. C:\\Data\\Quixel Library) \n")+"\\"
 	##add save logic
@@ -62,58 +70,76 @@ def uIn0(): ## This function handles uInput that has to be made each time. // Ha
 	ID = input("Enter an ID. (Tip: use the ID of the source atlas with xy coordinates describing the position of the Decal in the Atlas in terms of rows and columns. rcihc2 ->xyrcihc2 e.g. 24rcihc2): ")
 	IDminus2 = ID[:-1] ## removes the "2" from the name for naming the maps in the rootDir
 def uIn1(): ## This function handles uInput that can be reused in further iterations (like category, tags, height, scan size etc.) //has to be called only when neccesarry.
-	mCat = input("Enter the Top-Level Category for your Atlas/Decal, e.g. Asphalt, Brick, Brushes, Bush, Climber,... .:\n")
-	sCat = input("Enter the secondary Category for your Atlas/Decal, e.g. for Top Level Asphalt - Coarse, Cracked, Dried, Fine, ...: \n")
+	uIn1['mCat'] = input("Enter the Top-Level Category for your Atlas/Decal, e.g. Asphalt, Brick, Brushes, Bush, Climber,... .:\n")
+	uIn1['sCat'] = input("Enter the secondary Category for your Atlas/Decal, e.g. for Top Level Asphalt - Coarse, Cracked, Dried, Fine, ...: \n")
 	## res Chooser. 1,2,4,8 und enter um Auflösung zu wählen.
 	resChoose = input("For 1K enter 1, for 2K enter 2, for 4K enter 4, for 8K enter 8.\n")
 	if resChoose == "1":
 		print ("You entered 1K.")
-		res = "1K"
+		uIn1['res'] = "1K"
 	elif resChoose == "2":
 		print("You entered 2K.")
-		res = "2K"
+		uIn1['res'] = "2K"
 	elif resChoose == "4":
 		print("You entered 4K.")
 		res = "4K"
 	elif resChoose == "8":
 		print("You entered 8K.")
-		res = "8K"
+		uIn1['res'] = "8K"
 	else :
 		print("Please enter a valid number.")
 	##MetaData
-	scnA = input("Enter the dimensions of the scanned area. This is meta-data and not vital information. e.g. 2x2, 0.25x0.25 etc. Formatting is important.\n")
-	scnH = input("Enter height of the scanned surface. This is meta-data and not vital information.\n")
+	uIn1['scnA'] = input("Enter the dimensions of the scanned area. This is meta-data and not vital information. e.g. 2x2, 0.25x0.25 etc. Formatting is important.\n")
+	uIn1['scnH'] = input("Enter height of the scanned surface. This is meta-data and not vital information.\n")
 	
 	##Enter Tags:
-	tagsIn = []
+	
 	while True:
 		tmptag = input("You can now enter tags, one at a time, and press enter to accept it. If you are done, enter 'done' to continue with the script. \n")
 		if tmptag != 'done':
-			tagsIn.append(tmptag)
+			uIn1['tags'].append(tmptag)
 		else:
 			break
 	##########TO ADD############
 	###Save variables as JSON###
-
+def uIn1R():#reads uIn1 from file, calls uIn1() if nothing found, and asks if user wants to change them.
+	in1keys =['mCat','sCat','res','scnA','scnH','tags'] # contains all keys to iterate through
+	counter = 0
+	
+	for key in uIn1: #take key from uIn1 (e.g. 'mCat')
+		if data[key] != "": ##check if data[key/'mCat'] is empty. If not:
+			counter += 1
+			
+	if counter == 0: #if data is empty
+		uIn1()#call uIn1 (which promts user input and saves it to file)
+		
+	if counter > 0: #if there is data
+		switch = input('Shall category, tags, scan area/height and resolution stay the same? If yes, just hit enter, if not, enter something and confirm.: ')
+			if switch == "": 				#if pressed enter use file to fill uIn1
+				for key in uIn1:			#uIn1 is a subset of data. 
+					uIn1[key] = data[key] 	#Only the keys in uIn1 are taken from data to fill uIn1. e.g. uIn1{'mCat':""} = data{'mCat':"override"}
+			else:
+				uIn1() # call uIn1 to get user Input and write it to file.		
+				
 def uInConfirm(): ##prints all uIn values and stops the program so user can restart or continue
 	print("Here you can check if you made any mistakes, and if necessary, restart the assistent.")
 	print("Libary Path: " + libDir)
 	print("Source Path: " + srcDir)
 	print("Name: " + name)
 	print("ID: " + ID)
-	print("Main Category: " + mCat)
-	print("Secondary Category: " + sCat)
-	print("res: " + res)
-	print("Scan Area: " + scnA)
-	print("Scan Heigt: " + heightVar)
+	print("Main Category: " + uIn1['mCat'])
+	print("Secondary Category: " + uIn1['sCat'])
+	print("res: " + uIn1['res'])
+	print("Scan Area: " + uIn1['scnA'])
+	print("Scan Heigt: " + uIn1['scnH'])
 	print("Tags: ")
-	print(tagsIn)
+	print(uIn1['tags'])
 	print("Press Enter to continue or re-run the script if you find an error")
 	input()#holds the program until enter is pressed.
 
 def mkDir(): ## handles directory creation
 	#Create Directories
-	rootDir = libDir + "Custom\\atlas\\" + mCat+"_"+sCat+"_"+ID+"\\" ## Generate path name for root directory
+	rootDir = libDir + "Custom\\atlas\\" + uIn1['mCat']+"_"+uIn1['sCat']+"_"+ID+"\\" ## Generate path name for root directory
 	try:
 		os.mkdir(rootDir) ##create atlas root folder
 		os.mkdir(rootDir +"previews")
@@ -138,7 +164,7 @@ def cpMaps(): ##handles copying and converting maps from source to root
 			if re.search("preview.png", srcName, flags=re.I):
 				preview = Image.open(srcDir+srcName)
 				print("Preview File found\n")
-				global prevcheck=1
+				prevcheck=1
 		if prevcheck == 0:
 			print("No Preview found. One will be generated instead")
 			
@@ -192,59 +218,33 @@ def jEdit(): ##handles JSON editing
 	
 	with open(os.path.join(rootDir, ID+".json"), "r+") as J: # opens .json as J
 		##Use dict key as String-to-replace and value as string to replace with.
-		match={r"\btmpName\b":name,r"\bmCat\b":mCat,r"\bsCat\b":sCat,r"\bscanAreaVar\b":scnA,r"\bheightVar\b":scnH}#{pattern:replacestring}
+		match={r"\btmpName\b":name,r"\bmCat\b":uIn1['mCat'],r"\bsCat\b":uIn1['sCat'],r"\bscanAreaVar\b":uIn1['scnA'],r"\bheightVar\b":uIn1['scnH']}#{pattern:replacestring}
 		def replace_all(text,dic): #handles the replace all whole words logic
 			for key, val in dic.items():
 				text = re.sub(key,val,text)
 			return text
 		jdict = json.load(J) # serializes the content of the loaded json as "jcontent" (type dict)
-		jdict['tags'] = tagsIn #adds tags to "tags" key in json
+		jdict['tags'] = uIn1['tags'] #adds tags to "tags" key in json
 		jstring = json.dumps(jdict, indent=4) # dumps the content into a single string with indentation
 		jstring = replace_all(jstring,match) #replaces all keyWords in the jstring with the Variable Values
 		J.write(jstring)#Writes the human-readable string to file
 
-def loadData(): #handles loading data.json
-	d = open('data.json',"w+")
-	data = json.load(d) # serializes data.json as dict (initialized as global var)
 
-
-	
-def uIn1R():#reads uIn1 from file, calls uIn1() if nothing found, and asks if user wants to change them.
-	in1keys ={'mCat':mCat,'sCat':sCat,'res':res,'scnA':scnA,'scnH':scnH,'tagsIn':tagsIn}#contains all dict keys to iterate through
-	counter = 0
-	
-	for key, val in in1keys.items():
-		if data[key] != "": ##check if data[key] is empty. If not:
-			counter += 1
-			
-	if counter == 0: #if data is empty
-		uIn1()#call uIn1 (which promts user input and saves it to file)
-	if counter > 0: #if there is data
-		switch = input('Shall category, tags, scan area/height and resolution stay the same? If yes, just hit enter, if not, enter something and confirm.: ')
-			if switch == "":
-				for key, val in in1keys.items():
-					key = data[key] #e.g. global var mCat = data['mCat']. Die Frage ist, ob er val auch mit mCat ersetzt - tut er nicht.
-					### ich kann alle globalen uIn1 Variablen in einem Dict zusammenfassen. Dann müssen aber alle Referenzen entsprechend ersetzt werden.
 				
-				
-				for key, val in in1keys.items():
-					data[key]=val## e.g. 'mCat':mCat
-				
-					
-			
-			
-			
-			
-			
-			
-			
-			uInLib() ## if not, ask for it and save it to data.json
-
-#1. is Library path in file?
+#1#
+###Get Info###
 libDirR() #read libDir from data.json and call uInLib if no data in file
+uIn1R() # read all keys of uIn1 from data
+uIn0() # promt user for single-use data
+uInConfirm() # let user confirm all settings
 
-switch = input('Shall category, tags, scan area/height and resolution stay the same? If yes, just hit enter, if not, enter something and confirm. ')
-if
+#2#
+###Use Info###
+mkDir() # create all Directories
+cpMaps() # copies all maps in right naming convention, format and dimensions to rootDir
+prev() # genererate Previews and save
+
+
 
 	
 	

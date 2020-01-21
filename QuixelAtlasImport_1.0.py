@@ -38,7 +38,7 @@ from shutil import copyfile
 prevcheck=0
 while True: #envelope loop
 	##Input Assistant:
-	print("be careful that you enter following inputs correctly, there is no check for invalid paths. The script is not case sensitive. \n")
+	print("be careful that you enter following inputs correctly, there is no check for invalid paths.\n")
 	LibraryPath = input("Enter the path of your Quixel Library Directory (e.g. C:\\Data\\Quixel Library) \n")+"\\"
 	print("Caution. The script identifies the maps according to matching the first three letters of each name (except two for AO). ALBedo, AO, DISplacement, GLOss, NORmal, OPAcity ROUghness, SPEcular, TRAnslucency. As long these three letters are in the respective file name, the script detects them: \n ")
 	SourcePath = input("Enter the path of your source folder containing all texture maps to be imported (e.g. C:\\Users\You\\Documents\\MyAwesomeDecal). If you have a custom preview as png(!), put it in this folder named 'preview.png', to make the script use this instead of a generated one. It will be automatically resizied to 1280x1280/360x360.\n")+"\\"
