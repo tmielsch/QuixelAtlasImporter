@@ -27,7 +27,6 @@ preview = "" # contains preview picture opened in cpMaps() to be used by prev()
 mapAbr = ["alb","AO","dis","glo","nor","opa","rou","spe","tra"] # patterns for regex
 mapNames = ["Albedo","AO","Displacement","Gloss","Normal","Opacity","Roughness","Specular","Translucency"]
 libDir = "" #needed throughout the program, set by uInLib()
-#Misc Vars
 rootDir = ""#needed throughout the program, generated and set by mkDir()
 mapNames = [] # created in cpMaps(), needed in thumbs()
 data={} # all uIn_R() need to read from data. It's filled by loadData()
@@ -64,7 +63,7 @@ def saveData(): # handles saving dict 'data' to data.json
 def uInLib():#handles just the library input
 	global data
 	#global libDir
-	libDir = input("Enter the path of your Quixel Library Directory (e.g. C:\\Data\\Quixel Library) \n")+"\\"
+	libDir = input("Enter the path of your Quixel Library Directory.\n")+"\\"
 	data['libDir']=libDir #when uInLib() gets called and the user entered a lib Path, the corresponding key in data gets changed.
 	
 def InLibR():#reads libDir from data, calls uInLib if it can't find any stored, and asks if user wants to change stored
@@ -74,7 +73,8 @@ def InLibR():#reads libDir from data, calls uInLib if it can't find any stored, 
 		uInLib() ## if not, ask for it and save it to data.json
 	elif data['libDir'] != "":
 		print("This is your stored library directory: "+data['libDir'])
-		switch = input('Press enter to continue without changes, or type anything and confirm to change the library directory.')
+		print("\n")
+		switch = input('Press enter to continue without changes, or type anything and confirm to change the library directory.\n')
 		if switch == "":
 			libDir = data['libDir']##if user pressed enter, just use the stored libDir as libDir. Don't change the file.
 		if switch != "":#if user entered some string, reask for libDir
@@ -82,13 +82,13 @@ def InLibR():#reads libDir from data, calls uInLib if it can't find any stored, 
 				
 def uIn1(): ## This function handles uInput that can be reused in further iterations (like category, tags, height, scan size etc.) //has to be called only when neccesarry.
 	global uIn1dict
-	uIn1dict['mCat'] = input("Enter the Top-Level Category for your Atlas/Decal, e.g. Asphalt, Brick, Brushes, Bush, Climber,... .:\n")
-	
-	uIn1dict['sCat'] = input("Enter the secondary Category for your Atlas/Decal, e.g. for Top Level Asphalt - Coarse, Cracked, Dried, Fine, ...: \n")
+	uIn1dict['mCat'] = input("Enter the Top-Level Category for your Atlas/Decal, e.g. Asphalt, Brick, Brushes, Bush, Climber,... .: ")
+	print("\n")
+	uIn1dict['sCat'] = input("Enter the secondary Category for your Atlas/Decal, e.g. for Top Level Asphalt - Coarse, Cracked, Dried, Fine, ...: ")
 	
 	## res Chooser. 1,2,4,8 und enter um Auflösung zu wählen.
-	resChoose = input("For 1K enter 1, for 2K enter 2, for 4K enter 4, for 8K enter 8.\n")
-	
+	resChoose = input("For 1K enter 1, for 2K enter 2, for 4K enter 4, for 8K enter 8: ")
+	print("\n")
 	if resChoose == "1":
 		print ("You entered 1K.")
 		uIn1dict['res'] = "1K"
@@ -107,17 +107,18 @@ def uIn1(): ## This function handles uInput that can be reused in further iterat
 		
 	else :
 		print("Please enter a valid number.")
-		
+	print("\n")	
 	##MetaData
 	
-	uIn1dict['scnA'] = input("Enter the dimensions of the scanned area. This is meta-data and not vital information. e.g. 2x2, 0.25x0.25 etc. Formatting is important.\n")
-	
-	uIn1dict['scnH'] = input("Enter height of the scanned surface. This is meta-data and not vital information.\n")
-	
+	uIn1dict['scnA'] = input("Enter the dimensions of the scanned area. e.g. 2x2, 0.25x0.25 etc. Formatting is important: ")
+	print("\n")
+	uIn1dict['scnH'] = input("Enter height of the scanned surface.\n")
+	print("\n")
 	
 	##Enter Tags:
 	while True:
-		tmptag = input("You can now enter tags, one at a time, and press enter to accept it. If you are done, enter 'done' to continue with the script. \n")
+		tmptag = input("You can now enter tags, one at a time, and press enter to accept it. Enter 'done' to continue with the script: ")
+		print("\n")
 		if tmptag != 'done':
 			uIn1dict['tags'].append(tmptag)
 		else:
@@ -140,7 +141,16 @@ def In1R():#reads uIn1dict from file, calls uIn1() if nothing found, and asks if
 		uIn1()#call uIn1 (which promts user input and saves it to file)
 		
 	if counter > 0: #if there is data
-		switch = input('Shall category, tags, scan area/height and resolution stay the same? If yes, just hit enter, if not, enter something and confirm.: ')
+		print("Main Category: " + data['mCat'])
+		print("Secondary Category: " + data['sCat'])
+		print("Resolution: " + data['res'])
+		print("Scan Area: " + data['scnA'])
+		print("Scan Heigt: " + data['scnH'])
+		print("Tags: ")
+		for tg in data['tags']:
+			print(tg)
+		print()
+		switch = input('Do you wish to keep those inputs or do you want to make new ones? Press enter to keep, enter anything and confirm to edit:\n')
 		if switch == "": 				#if pressed enter use file to fill uIn1dict
 			for key in uIn1dict:			#uIn1dict is a subset of data. 
 				uIn1dict[key] = data[key] 	#Only the keys in uIn1dict are taken from data to fill uIn1dict. e.g. uIn1dict{'mCat':""} = data{'mCat':"override"}
@@ -149,18 +159,18 @@ def In1R():#reads uIn1dict from file, calls uIn1() if nothing found, and asks if
 
 def uIn2(): ## This function handles uInput that has to be made each time. // Has to be called in every iteration
 	print("Be careful, there is no check for invalid paths.\n")
-	print("Make sure your maps have at least the three first letters in their Abbrevation. e.g. mapname_alb.jpg (except AO).")
+	
+	print("Make sure your maps have at least the three first letters in their Abbrevation. e.g. mapname_alb.jpg (except AO).\n")
 	global srcDir
 	global name
 	global ID
 	global IDminus2
 	
-	srcDir = input("Enter the path of your source folder containing all texture maps to be imported. You can provide your custom preview named as such to avoid a generated one.: ")+"\\"
-	
-	name = input("Enter the name visible in Bridge: ")
-	
-	ID = input("Enter an ID. (Tip: use the ID of the source atlas with xy coordinates describing the position of the Decal in the Atlas in terms of rows and columns. rcihc2 ->xyrcihc2 e.g. 24rcihc2): ")
-	
+	srcDir = input("Enter the path of your source folder containing all texture maps to be imported. You can provide your custom preview named as such to avoid a generated one.:\n")+"\\"
+	name = input("Enter the name visible in Bridge:\n")
+	#print("\n")
+	ID = input("Enter an ID. (Tip: use the ID of the source atlas with xy coordinates describing the position of the Decal in the Atlas in terms of rows and columns. rcihc2 ->xyrcihc2 e.g. 24rcihc2):\n")
+	print("\n")
 	IDminus2 = ID[:-1] ## removes the "2" from the name for naming the maps in the rootDir
 					
 def uInConfirm(): ##prints all uIn values and stops the program so user can restart or continue
@@ -170,21 +180,34 @@ def uInConfirm(): ##prints all uIn values and stops the program so user can rest
 	#global uIn1dict
 	#global libDir
 	
-	print("Here you can check if you made any mistakes, and if necessary, restart the assistent.")
-	print("Libary Path: " + libDir)
-	print("Source Path: " + srcDir)
-	print("Name: " + name)
-	print("ID: " + ID)
-	print("Main Category: " + uIn1dict['mCat'])
-	print("Secondary Category: " + uIn1dict['sCat'])
-	print("res: " + uIn1dict['res'])
-	print("Scan Area: " + uIn1dict['scnA'])
-	print("Scan Heigt: " + uIn1dict['scnH'])
-	print("Tags: ")
-	print(uIn1dict['tags'])
-	print("Press Enter to continue or re-run the script if you find an error")
-	input()#holds the program until enter is pressed.
+	print("Here you can check if you made any mistakes, and if necessary, restart the assistant.\n")
+	
+	print("Libary Path: " + libDir+"\n")
 
+	print("Source Path: " + srcDir+"\n")
+	
+	print("Name: " + name)
+	
+	print("ID: " + ID)
+	
+	print("Main Category: " + uIn1dict['mCat'])
+	
+	print("Secondary Category: " + uIn1dict['sCat'])
+	
+	print("Resolution: " + uIn1dict['res'])
+	
+	print("Scan Area: " + uIn1dict['scnA'])
+	
+	print("Scan Heigt: " + uIn1dict['scnH']+"\n")
+	
+	print("Tags: ")
+	
+	for tg in uIn1dict['tags']:
+		print(tg)
+	print("\n")
+	print("Press Enter to continue or re-run the script if you find an error.")
+	input()#holds the program until enter is pressed.
+	print("\n")
 def mkDirs(): ## handles directory creation
 	#Create Directories
 	global rootDir
@@ -197,7 +220,8 @@ def mkDirs(): ## handles directory creation
 		os.mkdir(rootDir+"Thumbs\\1K")
 		os.mkdir(rootDir+"Thumbs\\2K")
 	except:
-		input("Failed to create directories.Check permissions and delete previously created directories.")
+		input("Failed to create directories. Check permissions and delete previously created directories.")
+		print("\n")
 
 def cpMaps(): ##handles copying and converting maps from source to root
 	global mapNames
@@ -222,10 +246,13 @@ def cpMaps(): ##handles copying and converting maps from source to root
 			prevcheck=1
 	if prevcheck == 0:
 		print("No Preview found. One will be generated instead")
+		print("\n")
 		
 
-	print("The following maps were created based on source input:\n")
-	print(filenames)	
+	print("The following maps were created based on source input: ")
+	print("\n")
+	for fn in filenames:
+		print(fn)	
 
 def mkPrev(): # handles preview generation or conversion
 	#global uIn1dict
@@ -257,7 +284,7 @@ def mkPrev(): # handles preview generation or conversion
 		RGB.save(rootDir+"previews\\"+ID+"_Preview_Retina_sp.jpg")
 		
 		print("The previews were generated by multiplying Albedo with AO. They are not representative of how the Atlas looks in a PBR engine.\n")	
-
+		print("\n")
 def mkThumbs(): ##handles map>thumb conversion
 	maps={}
 	#global rootDir
@@ -301,8 +328,7 @@ def jEdit(): ##handles JSON editing
 		#heigtVar funktioniert auch nicht?! wtf.
 		
 		match={r"\btmpName\b":name,r"\bmCat\b":uIn1dict['mCat'],r"\bsCat\b":uIn1dict['sCat'],r"\bscanAreaVar\b":uIn1dict['scnA'],r"\bheightVar\b":uIn1dict['scnH']}#{pattern:replacestring}
-		print(match[r"\btmpName\b"])
-		print(uIn1dict['tags'])
+
 		
 		def replace_all(text,dic): #handles the replace all whole words logic
 			for key, val in dic.items():
@@ -311,11 +337,9 @@ def jEdit(): ##handles JSON editing
 		
 		jdict = json.load(J) # serializes the content of the loaded json as "jcontent" (type dict)
 		jdict['tags'] = uIn1dict['tags'] #adds tags to "tags" key in json
-		print(jdict)
 		jstring = json.dumps(jdict, indent=4) # dumps the content into a single string with indentation
-		print(jstring) ## warum sind hier die tags noch drinnen?!
 		jstring = replace_all(jstring,match) #replaces all keyWords in the jstring with the Variable Values
-		print(jstring)##hier klappt name auf einmal ?! aber der rest nicht. Als ob es invertiert wäre, und alles was im dump nicht geht, eigentlich gehen sollte und umgekehrt wtf
+		
 	
 	with open(templatetarget, "w+") as f:
 		f.write(jstring)#Writes the human-readable string to file
