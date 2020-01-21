@@ -15,7 +15,7 @@ GNU General Public License for more details.
 - Pillow Image Library: cmd -> pip install pillow - sometimes, beside it being installed, python fails to load PIL(Pillow). using pip uninstall pillow to uninstall and then reinstalling solves this issue.
 
 # How to start: 
-- Extract zip content where you want
+- Clone branch contents into directory
 - open cmd (if any of your Quixel Library or Source directories has restricted access, start cmd as admin)
 - cd to home directory of script
 - enter QuixelAtlasImport.py to run script.
