@@ -42,5 +42,5 @@ Since Bridge doesn't support custom atlasses officially, they can't be imported 
 
 # If they don't appear right away, use Ctrl+R or View>Reload. After that they should appear on top. If they still aren't visible, try restarting bridge and hitting reload until they appear.
 
-
+# If you get an error "New Name was referenced before assignment", one of the source maps isn't named correctly. This will be better managed in an future update.
 
